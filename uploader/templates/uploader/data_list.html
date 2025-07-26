@@ -1,0 +1,115 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html class="h-100">
+
+<head>
+    <title>Список данных</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <link rel="icon" href="{% static 'uploader/icons/favicon.svg' %}" type="image/svg+xml">
+
+    <link href="{% static 'uploader/bootstrap/bootstrap.min.css' %}" rel="stylesheet">
+    <link href="{% static 'uploader/datatables/datatables.min.css' %}" rel="stylesheet">
+
+    <script src="{% static 'uploader/jquery/jquery.min.js' %}"></script>
+    <script src="{% static 'uploader/datatables/datatables.min.js' %}"></script>
+
+    <style>
+        @font-face {
+            font-family: 'CeraPro Light';
+            src: url("{% static 'uploader/fonts/CeraPro-Light.ttf' %}") format('truetype');
+        }
+
+        body {
+            color: #d1cdc7;
+            font-family: 'CeraPro Light';
+            background-color: #181a1b;
+            box-shadow: inset 0 0 5rem rgba(0, 0, 0, .5);
+        }
+
+        @media (min-width: 360px) and (max-width: 768px) {
+            body {
+                box-shadow: none;
+            }
+        }
+
+        .nav-link.active {
+            border-radius: .75rem;
+        }
+
+        /* окантовка таблицы */
+        .dt-container {
+            padding: 0 1rem;
+            border: 2px solid #252423;
+            border-radius: 1rem;
+        }
+
+        /* стилизация полей для ввода */
+        div.dt-container .dt-search input,
+        div.dt-container .dt-input {
+            border: 2px solid #252423 !important;
+            border-radius: .5rem;
+        }
+
+        /* стилизация элементов пагинации */
+        div.dt-container .dt-paging .dt-paging-button.current {
+            background: none;
+            border-radius: .5rem;
+            border: 2px solid #252423;
+        }
+        div.dt-container .dt-paging .dt-paging-button.disabled {
+            color: #fafafa !important;
+        }
+    </style>
+</head>
+
+<body class="d-flex h-100">
+    <div class="container py-3 py-md-4">
+        <div class="d-flex justify-content-start align-items-center">
+            <label class="fs-2 lh-1 mb-3">Список</label>
+        </div>
+        <table id="dataTable">
+            <thead>
+                <tr>
+                    <th>Текст</th>
+                    <th>Дата</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in data %}
+                <tr>
+                    <td>{{ item.name }}</td>
+                    <td>{{ item.date }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <footer class="position-absolute bottom-0 start-50 translate-middle-x mt-auto text-white-50 d-flex flex-wrap justify-content-center py-3">
+            <ul class="nav nav-pills">
+                <li class="nav-item">
+                    <a href="/" class="nav-link text-white-50" aria-current="page">Загрузка</a>
+                </li>
+                <li class="nav-item">
+                    <a href="/data_list" class="nav-link active bg-dark">Список</a>
+                </li>
+            </ul>
+        </footer>
+    </div>
+</body>
+
+<script>
+    var table = new DataTable('#dataTable', {
+        language: {
+            url: "{% static 'uploader/other/ru.json' %}",
+            paginate: {
+                first: '«',
+                previous: '‹',
+                next: '›',
+                last: '»'
+            }
+        },
+    })
+</script>
+
+</html>

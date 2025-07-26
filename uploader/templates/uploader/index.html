@@ -1,0 +1,226 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html class="h-100">
+
+<head>
+    <title>Загрузка JSON</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <link rel="icon" href="{% static 'uploader/icons/favicon.svg' %}" type="image/svg+xml">
+
+    <link href="{% static 'uploader/bootstrap/bootstrap.min.css' %}" rel="stylesheet">
+    <script src="{% static 'uploader/bootstrap/bootstrap.bundle.min.js' %}"></script>
+
+    <style>
+        @font-face {
+            font-family: 'CeraPro Light';
+            src: url("{% static 'uploader/fonts/CeraPro-Light.ttf' %}") format('truetype');
+        }
+
+        body {
+            color: #d1cdc7;
+            font-family: 'CeraPro Light';
+            background-color: #181a1b;
+            box-shadow: inset 0 0 5rem rgba(0, 0, 0, .5);
+        }
+
+        @media (min-width: 360px) and (max-width: 768px) {
+            body {
+                box-shadow: none;
+            }
+        }
+
+        .btn-lg,
+        .nav-link.active {
+            border-radius: .75rem;
+        }
+
+        .json-icon {
+            width: 45px;
+            height: 45px;
+            background-color: #242424;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: .75rem;
+            font-weight: 800;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+
+<body class="d-flex h-100 text-center">
+    <div class="cover-container d-flex w-100 h-100 p-3 mx-auto flex-column">
+        <div class="position-absolute top-50 start-50 translate-middle">
+            <label class="fs-2 lh-1">Выберите файл</label>
+
+            <div class="position-relative py-4 d-flex flex-column align-items-center">
+                <div
+                    class="card my-3 rounded-4 d-flex flex-column justify-content-center align-items-center"
+                    style="height: 250px; width: 250px; border: 3px dotted #d1cdc7; cursor: pointer; background: none;"
+                    onclick="this.querySelector('.file-input').click()"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="45" height="45" fill="#d1cdc7" class="bi bi-plus-lg" viewBox="0 0 16 16">
+                        <path fill-rule="evenodd" d="M8 2a.5.5 0 0 1 .5.5v5h5a.5.5 0 0 1 0 1h-5v5a.5.5 0 0 1-1 0v-5h-5a.5.5 0 0 1 0-1h5v-5A.5.5 0 0 1 8 2Z">
+                        </path>
+                    </svg>
+
+                    <input class="file-input d-none" type="file" accept=".json" onchange="add_file()">
+                </div>
+
+                <div class="file p-2 d-flex flex-row align-items-center rounded-4 d-none" style="width: 350px; border: 1px solid #252423;">
+                    <div class="json-icon">JSON</div>
+                    <div class="d-flex flex-column text-start" style="max-width: calc(100% - 90px);">
+                        <div class="file-name text-truncate mx-2"></div>
+                        <div class="file-size text-truncate mx-2"></div>
+                    </div>
+                    <button class="btn btn-outline-danger ms-auto" style="width: 45px; height: 45px; border-radius: .75rem;" onclick="delete_file()">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16">
+                            <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"></path>
+                            <path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <button class="btn btn-lg text-white fw-bold bg-dark border-0 disabled" onclick="upload_file()">Сохранить</button>
+        </div>
+
+        <div class="toast-container toast-container bottom-0 end-0 m-4"></div>
+
+        <div class="position-absolute bottom-0 start-50 translate-middle-x mt-auto text-white-50 d-flex flex-wrap justify-content-center py-3">
+            <ul class="nav nav-pills">
+                <li class="nav-item">
+                    <a href="/" class="nav-link active bg-dark " aria-current="page">Загрузка</a>
+                </li>
+                <li class="nav-item">
+                    <a href="/data_list" class="nav-link text-white-50">Список</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</body>
+
+<script>
+    var card = document.querySelector('.card')
+    var file = document.querySelector('.file')
+    var btn = document.querySelector('.btn-lg')
+
+    var file_input = document.querySelector('.file-input')
+
+    if (file_input.value) {
+        add_file()
+    }
+
+
+    function formatFileSize(bytes) {
+        if (bytes === 0) return '0 B'
+
+        const k = 1024
+        const sizes = ['B', 'KB', 'MB', 'GB']
+        const i = Math.floor(Math.log(bytes) / Math.log(k))
+        const value = bytes / Math.pow(k, i)
+
+        const formattedValue = value % 1 === 0 ? value.toString() : value.toFixed(2)
+        
+        return formattedValue + ' ' + sizes[i]
+    }
+
+    function add_file() {
+        card.classList.add('d-none')
+        file.classList.remove('d-none')
+        btn.classList.remove('disabled')
+
+        var select_file = file_input.files[0]
+
+        console.log('Выбран файл:', select_file.name, formatFileSize(select_file.size))
+
+        file.querySelector('.file-name').textContent = select_file.name
+        file.querySelector('.file-size').textContent = formatFileSize(select_file.size)
+    }
+
+    function delete_file() {
+        file_input.value = ''
+
+        file.querySelector('.file-name').textContent = ''
+        file.querySelector('.file-size').textContent = ''
+
+        console.log('Файл удален')
+
+        card.classList.remove('d-none')
+        file.classList.add('d-none')
+        btn.classList.add('disabled')
+    }
+
+    function getCookie(name) {
+        const value = `; ${document.cookie}`
+        const parts = value.split(`; ${name}=`)
+        if (parts.length === 2) return parts.pop().split(';').shift()
+    }
+
+    function show_toast(message, success) {
+        const toastId = 'toast-' + Date.now()
+        const toastHtml = `
+            <div id="${toastId}" class="toast align-items-center text-bg-${success ? 'success' : 'danger'} border-0">
+                <div class="d-flex">
+                    <div class="toast-body">${message}</div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                </div>
+            </div>
+        `
+
+        let container = document.querySelector('.toast-container')
+        container.insertAdjacentHTML('beforeend', toastHtml)
+
+        const toastEl = document.getElementById(toastId)
+
+        toastEl.addEventListener('hidden.bs.toast', function() {
+            this.remove()
+        })
+
+        const toast = new bootstrap.Toast(toastEl, {
+            delay: 5000,
+            autohide: true
+        })
+
+        toast.show()
+    }
+
+    async function upload_file() {
+        const select_file = file_input.files[0]
+
+        const formData = new FormData()
+        formData.append('file', select_file)
+
+        const response = await fetch('', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken') || '',
+                'Accept': 'application/json'
+            }
+        })
+
+        const result = await response.json()
+
+        console.log(result)
+
+        if (response.ok) {
+            console.log('Файл успешно загружен')
+
+            show_toast('Файл успешно загружен', true)
+
+            delete_file()
+        } else {
+            if (result.keys().includes('errors')) {
+                result.errors.forEach(error => {
+                    show_toast(`Ошибка ${error}`, false)
+                })
+            } else {
+                show_toast(`Ошибка ${result.error}`, false)
+            }
+        }
+    }
+</script>
+
+</html>

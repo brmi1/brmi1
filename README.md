@@ -133,3 +133,10 @@ sudo ln -s /etc/nginx/sites-available/brmi1 /etc/nginx/sites-enabled
 sudo nginx -t
 sudo systemctl restart nginx
 ```
+
+# Интерфейс
+
+![Основной интерфейс](screenshots/1.png)
+![Выбор файла](screenshots/2.png)
+![Сообщнение об успешной загрузке](screenshots/3.png)
+![Список данных](screenshots/4.png)
